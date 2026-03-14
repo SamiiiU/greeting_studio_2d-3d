@@ -44,6 +44,7 @@ export default function Sphere({ position, radius }) {
   const innerRef = useRef()
   const ringRef = useRef()
   const groupRef = useRef()
+  const lastTouchTapRef = useRef(0)
   const [blasted, setBlasted] = useState(false)
   const [showText, setShowText] = useState(false)
 
@@ -122,6 +123,19 @@ export default function Sphere({ position, radius }) {
     document.body.style.cursor = 'default'
   }, [])
 
+  const handlePointerDown = useCallback((e) => {
+    if (e.pointerType === 'touch') {
+      const now = performance.now()
+      const DOUBLE_TAP_MS = 320
+      if (now - lastTouchTapRef.current <= DOUBLE_TAP_MS) {
+        handleClick(e)
+      }
+      lastTouchTapRef.current = now
+      return
+    }
+    handleClick(e)
+  }, [handleClick])
+
   return (
     <group ref={groupRef} position={position}>
       {!showText && (
@@ -129,7 +143,7 @@ export default function Sphere({ position, radius }) {
           {/* Outer shell */}
           <mesh
             ref={outerRef}
-            onClick={handleClick}
+            onPointerDown={handlePointerDown}
             onPointerOver={handlePointerOver}
             onPointerOut={handlePointerOut}
           >
@@ -144,7 +158,7 @@ export default function Sphere({ position, radius }) {
           </mesh>
 
           {/* Inner glow shell (slightly smaller, emissive) */}
-          <mesh ref={innerRef} onClick={handleClick}>
+          <mesh ref={innerRef} onPointerDown={handlePointerDown}>
             <sphereGeometry args={[radius * 0.78, 24, 24]} />
             <meshStandardMaterial
               color="#fbbf24"
@@ -156,7 +170,7 @@ export default function Sphere({ position, radius }) {
           </mesh>
 
           {/* Equatorial halo ring */}
-          <mesh ref={ringRef} onClick={handleClick}>
+          <mesh ref={ringRef} onPointerDown={handlePointerDown}>
             <torusGeometry args={[radius * 1.1, radius * 0.04, 8, 64]} />
             <meshStandardMaterial
               color="#fbbf24"

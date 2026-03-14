@@ -1,7 +1,7 @@
 /**
  * DrawingLayer.jsx
  * A transparent HTML5 canvas that sits on top of the Three.js canvas.
- * Captures mouse events for rubber-band shape drawing and renders the
+ * Captures pointer events for rubber-band shape drawing and renders the
  * live preview. Passes finalised shapes up to the parent via callbacks.
  */
 import React, { useRef, useEffect, useCallback } from 'react'
@@ -85,23 +85,31 @@ export default function DrawingLayer({
     return { x: e.clientX - rect.left, y: e.clientY - rect.top }
   }
 
-  const handleMouseDown = useCallback((e) => {
+  const handlePointerDown = useCallback((e) => {
     if (!activeTool) return
     e.preventDefault()
+    if (canvasRef.current?.setPointerCapture) {
+      canvasRef.current.setPointerCapture(e.pointerId)
+    }
     const { x, y } = pos(e)
     onMouseDown(x, y)
   }, [activeTool, onMouseDown])
 
-  const handleMouseMove = useCallback((e) => {
+  const handlePointerMove = useCallback((e) => {
     if (!drawState.isDrawing) return
+    e.preventDefault()
     const { x, y } = pos(e)
     onMouseMove(x, y)
   }, [drawState.isDrawing, onMouseMove])
 
-  const handleMouseUp = useCallback((e) => {
+  const handlePointerUp = useCallback((e) => {
     if (!drawState.isDrawing) return
+    e.preventDefault()
     const { x, y } = pos(e)
     onMouseUp(x, y)
+    if (canvasRef.current?.releasePointerCapture) {
+      canvasRef.current.releasePointerCapture(e.pointerId)
+    }
   }, [drawState.isDrawing, onMouseUp])
 
   return (
@@ -114,13 +122,15 @@ export default function DrawingLayer({
         height: '100%',
         zIndex: 10,
         cursor: activeTool ? 'crosshair' : 'default',
+        touchAction: activeTool ? 'none' : 'auto',
         // Only block pointer events while a tool is active
         pointerEvents: activeTool ? 'all' : 'none',
       }}
-      onMouseDown={handleMouseDown}
-      onMouseMove={handleMouseMove}
-      onMouseUp={handleMouseUp}
-      onMouseLeave={handleMouseUp}
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
+      onPointerCancel={handlePointerUp}
+      onPointerLeave={handlePointerUp}
     />
   )
 }

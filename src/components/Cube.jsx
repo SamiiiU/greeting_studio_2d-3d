@@ -57,6 +57,7 @@ function getFaceConfigs(hw, hh, hd) {
 export default function Cube({ position, width, height }) {
   const groupRef = useRef()        // entire cube group (for rotation)
   const faceRefs = useRef([])      // ref array, one per face mesh
+  const lastTouchTapRef = useRef(0)
   const [blasted, setBlasted] = useState(false)
   const [showText, setShowText] = useState(false)
 
@@ -144,6 +145,19 @@ export default function Cube({ position, width, height }) {
     document.body.style.cursor = 'default'
   }, [])
 
+  const handlePointerDown = useCallback((e) => {
+    if (e.pointerType === 'touch') {
+      const now = performance.now()
+      const DOUBLE_TAP_MS = 320
+      if (now - lastTouchTapRef.current <= DOUBLE_TAP_MS) {
+        handleClick(e)
+      }
+      lastTouchTapRef.current = now
+      return
+    }
+    handleClick(e)
+  }, [handleClick])
+
   return (
     <group ref={groupRef} position={position}>
       {!showText && (
@@ -156,7 +170,7 @@ export default function Cube({ position, width, height }) {
               position={cfg.pos}
               rotation={cfg.rot}
               material={materials[i]}
-              onClick={handleClick}
+              onPointerDown={handlePointerDown}
               onPointerOver={handlePointerOver}
               onPointerOut={handlePointerOut}
             >

@@ -31,6 +31,8 @@ const TOOLS = [
 ]
 
 export default function Toolbar({ activeTool, onToolChange, objectCount, onClear }) {
+  const isMobile = typeof window !== 'undefined' ? window.innerWidth <= 768 : false
+
   return (
     <div
       style={{
@@ -40,9 +42,11 @@ export default function Toolbar({ activeTool, onToolChange, objectCount, onClear
         right: 0,
         zIndex: 20,
         display: 'flex',
-        alignItems: 'center',
+        alignItems: isMobile ? 'stretch' : 'center',
         justifyContent: 'space-between',
-        padding: '12px 24px',
+        flexDirection: isMobile ? 'column' : 'row',
+        gap: isMobile ? '10px' : '0',
+        padding: isMobile ? '10px 12px' : '12px 24px',
         background: 'linear-gradient(to bottom, rgba(10,10,15,0.98) 0%, rgba(10,10,15,0.6) 100%)',
         borderBottom: '1px solid rgba(251,191,36,0.12)',
         backdropFilter: 'blur(12px)',
@@ -53,7 +57,7 @@ export default function Toolbar({ activeTool, onToolChange, objectCount, onClear
       <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1 }}>
         <span style={{
           fontFamily: '"Cinzel Decorative", serif',
-          fontSize: '13px',
+          fontSize: isMobile ? '11px' : '13px',
           color: '#fbbf24',
           letterSpacing: '0.08em',
           textShadow: '0 0 20px rgba(251,191,36,0.5)',
@@ -62,7 +66,7 @@ export default function Toolbar({ activeTool, onToolChange, objectCount, onClear
         </span>
         <span style={{
           fontFamily: '"Cormorant Garamond", serif',
-          fontSize: '11px',
+          fontSize: isMobile ? '10px' : '11px',
           color: 'rgba(232,228,240,0.4)',
           letterSpacing: '0.12em',
           marginTop: '2px',
@@ -72,7 +76,15 @@ export default function Toolbar({ activeTool, onToolChange, objectCount, onClear
       </div>
 
       {/* Tool buttons */}
-      <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+      <div
+        style={{
+          display: 'flex',
+          gap: '8px',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          width: isMobile ? '100%' : 'auto',
+        }}
+      >
         {TOOLS.map(tool => (
           <button
             key={tool.id}
@@ -83,7 +95,11 @@ export default function Toolbar({ activeTool, onToolChange, objectCount, onClear
               display: 'flex',
               alignItems: 'center',
               gap: '7px',
-              padding: '8px 16px',
+              justifyContent: 'center',
+              minHeight: isMobile ? '44px' : 'auto',
+              minWidth: isMobile ? '0' : 'auto',
+              flex: isMobile ? '1 1 calc(50% - 4px)' : '0 0 auto',
+              padding: isMobile ? '10px 12px' : '8px 16px',
               background: activeTool === tool.id
                 ? 'rgba(251,191,36,0.08)'
                 : 'rgba(255,255,255,0.03)',
@@ -91,7 +107,7 @@ export default function Toolbar({ activeTool, onToolChange, objectCount, onClear
               borderRadius: '8px',
               color: activeTool === tool.id ? '#fbbf24' : 'rgba(232,228,240,0.55)',
               fontFamily: '"Cormorant Garamond", serif',
-              fontSize: '13px',
+              fontSize: isMobile ? '14px' : '13px',
               letterSpacing: '0.06em',
               cursor: 'pointer',
               fontWeight: activeTool === tool.id ? 600 : 400,
@@ -105,18 +121,20 @@ export default function Toolbar({ activeTool, onToolChange, objectCount, onClear
         {/* Divider */}
         {objectCount > 0 && (
           <>
-            <div style={{ width: '1px', height: '28px', background: 'rgba(255,255,255,0.08)', margin: '0 4px' }} />
+            {!isMobile && <div style={{ width: '1px', height: '28px', background: 'rgba(255,255,255,0.08)', margin: '0 4px' }} />}
             <button
               onClick={onClear}
               title="Clear scene"
               style={{
-                padding: '8px 14px',
+                minHeight: isMobile ? '44px' : 'auto',
+                width: isMobile ? '100%' : 'auto',
+                padding: isMobile ? '10px 14px' : '8px 14px',
                 background: 'rgba(255,255,255,0.02)',
                 border: '1px solid rgba(255,255,255,0.08)',
                 borderRadius: '8px',
                 color: 'rgba(232,228,240,0.35)',
                 fontFamily: '"Cormorant Garamond", serif',
-                fontSize: '12px',
+                fontSize: isMobile ? '13px' : '12px',
                 letterSpacing: '0.08em',
                 cursor: 'pointer',
                 transition: 'all 0.2s ease',
@@ -137,15 +155,17 @@ export default function Toolbar({ activeTool, onToolChange, objectCount, onClear
       </div>
 
       {/* Hint */}
-      <div style={{
-        fontFamily: '"Cormorant Garamond", serif',
-        fontSize: '12px',
-        color: 'rgba(232,228,240,0.3)',
-        letterSpacing: '0.1em',
-        fontStyle: 'italic',
-      }}>
-        Click objects to open them ✦
-      </div>
+      {!isMobile && (
+        <div style={{
+          fontFamily: '"Cormorant Garamond", serif',
+          fontSize: '12px',
+          color: 'rgba(232,228,240,0.3)',
+          letterSpacing: '0.1em',
+          fontStyle: 'italic',
+        }}>
+          Click objects to open them ✦
+        </div>
+      )}
     </div>
   )
 }
